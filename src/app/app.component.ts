@@ -50,9 +50,9 @@ import { PointFeature } from './models/geojson.interface';
           </div>
 
           <app-point-editor 
-            *ngIf="selectedFeature || isAddingNew"
+            *ngIf="selectedFeature"
             [feature]="selectedFeature"
-            [isEditing]="!!selectedFeature"
+            [isEditing]="!!selectedFeature && selectedFeature.id !== 'temp'"
             (save)="onPointSave($event)"
             (cancel)="onPointCancel()"
             (delete)="onPointDelete($event)">
@@ -64,6 +64,8 @@ import { PointFeature } from './models/geojson.interface';
             class="btn btn-primary add-point-btn">
             Add New Point
           </button>
+
+          <span *ngIf="isAddingNew">Please click on the map to add a new point</span>
         </div>
 
         <div class="map-container">

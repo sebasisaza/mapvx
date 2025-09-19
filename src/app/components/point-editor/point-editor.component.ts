@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PointFeature } from '../../models/geojson.interface';
@@ -46,7 +46,8 @@ import { PointFeature } from '../../models/geojson.interface';
           <label>Longitude</label>
           <input 
             type="number" 
-            [(ngModel)]="editableFeature!.geometry.coordinates[0]" 
+            [value]="getFormattedCoordinate(0)"
+            (input)="onCoordinateChange(0, $event)"
             step="any"
             class="form-control"
             readonly
@@ -56,7 +57,8 @@ import { PointFeature } from '../../models/geojson.interface';
           <label>Latitude</label>
           <input 
             type="number" 
-            [(ngModel)]="editableFeature!.geometry.coordinates[1]" 
+            [value]="getFormattedCoordinate(1)"
+            (input)="onCoordinateChange(1, $event)"
             step="any"
             class="form-control"
             readonly
@@ -98,6 +100,9 @@ import { PointFeature } from '../../models/geojson.interface';
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       margin-bottom: 20px;
+      max-width: 100%;
+      overflow: hidden;
+      box-sizing: border-box;
     }
     
     .point-editor h3 {
@@ -108,6 +113,8 @@ import { PointFeature } from '../../models/geojson.interface';
     
     .form-group {
       margin-bottom: 15px;
+      width: 100%;
+      box-sizing: border-box;
     }
     
     .form-group label {
@@ -119,10 +126,12 @@ import { PointFeature } from '../../models/geojson.interface';
     
     .form-control {
       width: 100%;
+      max-width: 100%;
       padding: 8px 12px;
       border: 1px solid #ddd;
       border-radius: 4px;
       font-size: 14px;
+      box-sizing: border-box;
     }
     
     .form-control:focus {
@@ -136,6 +145,8 @@ import { PointFeature } from '../../models/geojson.interface';
       grid-template-columns: 1fr 1fr;
       gap: 15px;
       margin-bottom: 20px;
+      width: 100%;
+      box-sizing: border-box;
     }
     
     .coord-group label {
@@ -194,7 +205,7 @@ import { PointFeature } from '../../models/geojson.interface';
     }
   `]
 })
-export class PointEditorComponent {
+export class PointEditorComponent implements OnChanges {
   @Input() feature: PointFeature | null = null;
   @Input() isEditing: boolean = false;
   
@@ -232,6 +243,20 @@ export class PointEditorComponent {
   onDelete(): void {
     if (this.editableFeature?.id) {
       this.delete.emit(this.editableFeature.id);
+    }
+  }
+
+  getFormattedCoordinate(index: number): number {
+    if (!this.editableFeature) return 0;
+    return parseFloat(this.editableFeature.geometry.coordinates[index].toFixed(4));
+  }
+
+  onCoordinateChange(index: number, event: Event): void {
+    if (!this.editableFeature) return;
+    const target = event.target as HTMLInputElement;
+    const value = parseFloat(target.value);
+    if (!isNaN(value)) {
+      this.editableFeature.geometry.coordinates[index] = value;
     }
   }
 }
